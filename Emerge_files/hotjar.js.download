@@ -1,0 +1,92 @@
+function initAppInsights(settings, appInsights, window, document) {
+  if (settings) {
+    appInsights = appInsights || (window.appInsights = function(config) {
+      function r(config) {
+        t[config] = function() {
+          var i = arguments;
+          t.queue.push(function() {
+            t[config].apply(t, i);
+          });
+        };
+      }
+      var t = {
+          config: config
+        },
+        u = document,
+        e = window,
+        o = "script",
+        s = u.createElement(o),
+        i, f;
+      for (s.src = config.url || "//az416426.vo.msecnd.net/scripts/a/ai.0.js", u.getElementsByTagName(o)[0].parentNode.appendChild(s), t.cookie = u.cookie, t.queue = [], i = ["Event", "Exception", "Metric", "PageView", "Trace", "Ajax"]; i.length;) r("track" + i.pop());
+      return r("setAuthenticatedUserContext"), r("clearAuthenticatedUserContext"), config.disableExceptionTracking || (i = "onerror", r("_" + i), f = e[i], e[i] = function (config, r, u, e, o) {
+        var s = f && f(config, r, u, e, o);
+        return s !== !0 && t["_" + i](config, r, u, e, o), s
+      }), t
+    }({
+      instrumentationKey: settings.key,
+      disableExceptionTracking: false,
+      disableFetchTracking: false,
+      disableAjaxTracking: false,
+    }));
+    appInsights.queue.push(function () {
+      appInsights.context.addTelemetryInitializer(function (envelope) {
+        if (envelope.name === Microsoft.ApplicationInsights.Telemetry.RemoteDependencyData.envelopeType && envelope.data.baseData.name.indexOf("signalr") > -1) {
+          return false;
+        }
+      });
+    });
+    appInsights.trackPageView();
+  }
+}
+
+function initHotjar(settings, window, document) {
+  if (settings) {
+    (function (h, o, t, j, a, r) {
+      h.hj = h.hj || function () {
+        (h.hj.q = h.hj.q || []).push(arguments)
+      };
+      h._hjSettings = {
+        hjid: settings.id,
+        hjsv: 6
+      };
+      a = o.getElementsByTagName('head')[0];
+      r = o.createElement('script');
+      r.async = 1;
+      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window, document, '//static.hotjar.com/c/hotjar-', '.js?sv=');
+  }
+}
+
+function initSurvicate(settings, window, document) {
+  if (settings) {
+    window._sv = window._sv || {};
+    window._sv.trackingCode = settings.trackingCode;
+    var s = document.createElement('script');
+    s.src = '//pa.survicate.com/assets/survicate.js';
+    s.async = true;
+    var e = document.getElementsByTagName('script')[0];
+    e.parentNode.insertBefore(s, e);
+  }
+}
+
+function initLinkedIn(settings, window, document) {
+  if (settings) {
+    window._linkedin_data_partner_id = settings.partnerId;
+    var s = document.getElementsByTagName("script")[0];
+    var b = document.createElement("script");
+    b.type = "text/javascript";
+    b.async = true;
+    b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+    s.parentNode.insertBefore(b, s);
+  }
+}
+
+(function (config, window, document) {
+  if (config) {
+    initAppInsights(config.appInsights, window.appInsights, window, document);
+    initHotjar(config.hotjar, window, document);
+    initSurvicate(config.survicate, window, document);
+    initLinkedIn(config.linkedin, window, document);
+  }
+})(configValues, window, document);
